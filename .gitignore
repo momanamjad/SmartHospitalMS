@@ -1,0 +1,9 @@
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+SmartHospitalMS/bin/
+SmartHospitalMS/obj/
