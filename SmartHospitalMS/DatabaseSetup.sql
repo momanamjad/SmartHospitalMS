@@ -1,10 +1,22 @@
 /* 
-  HOSPITAL DATABASE SCHEMA 
-  Run this script in SQL Server Management Studio (SSMS) 
-  or the Visual Studio 'Server Explorer'.
+  HOSPITAL DATABASE SETUP
+  
+  HOW TO RUN ON A NEW MACHINE (PowerShell):
+  1. Create the database:
+     sqllocaldb start MSSQLLocalDB
+     sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "CREATE DATABASE HospitalDB"
+  
+  2. Create tables and seed data:
+     sqlcmd -S "(localdb)\MSSQLLocalDB" -d HospitalDB -i DatabaseSetup.sql
+  
+  3. Update passwords to secure hashes:
+     sqlcmd -S "(localdb)\MSSQLLocalDB" -d HospitalDB -i SecurityUpdate.sql
 */
 
-CREATE DATABASE HospitalDB;
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'HospitalDB')
+BEGIN
+    CREATE DATABASE HospitalDB;
+END
 GO
 
 USE HospitalDB;
