@@ -63,14 +63,21 @@ namespace SmartHospitalMS
             btnDelete = new Button { Text = "Delete", Location = new Point(205, y), Size = new Size(90, 40), BackColor = Color.Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
             
             y += 50;
+            Button btnHistory = new Button { Text = "View Patient History", Location = new Point(15, y), Size = new Size(280, 40), BackColor = Color.SteelBlue, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            
+            y += 50;
             btnClear = new Button { Text = "Clear All Fields", Location = new Point(15, y), Size = new Size(280, 35), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9) };
 
             btnAdd.Click += BtnAdd_Click;
             btnUpdate.Click += BtnUpdate_Click;
             btnDelete.Click += BtnDelete_Click;
+            btnHistory.Click += (s, e) => {
+                if (selectedPatientID == 0) { MessageBox.Show("Select a patient from the grid first!"); return; }
+                new PatientHistoryForm(selectedPatientID, txtFullName.Text).ShowDialog();
+            };
             btnClear.Click += (s, e) => ClearFields();
 
-            pnlInputs.Controls.AddRange(new Control[] { btnAdd, btnUpdate, btnDelete, btnClear });
+            pnlInputs.Controls.AddRange(new Control[] { btnAdd, btnUpdate, btnDelete, btnHistory, btnClear });
             this.Controls.Add(pnlInputs);
 
             // 2. Grid Area (RIGHT) - FIXED LAYOUT
@@ -243,7 +250,7 @@ namespace SmartHospitalMS
         {
             if (e.RowIndex >= 0) {
                 DataGridViewRow row = dgvPatients.Rows[e.RowIndex];
-                selectedPatientID = Convert.ToInt32(row.Cells["PatientID"].Value);
+                selectedPatientID = Convert.ToInt32(row.Cells["ID"].Value);
                 
                 txtFullName.Text = row.Cells["FullName"].Value?.ToString() ?? "";
                 cmbGender.SelectedItem = row.Cells["Gender"].Value?.ToString();

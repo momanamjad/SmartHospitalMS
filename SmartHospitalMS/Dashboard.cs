@@ -108,25 +108,33 @@ namespace SmartHospitalMS
             statsPanel.Controls.Add(CreateStatCard("Appointments", out lblTodayAppointments, Color.FromArgb(155, 89, 182)));
             statsPanel.Controls.Add(CreateStatCard("Revenue", out lblTotalRevenue, Color.FromArgb(230, 126, 34)));
 
-            // Custom Chart Panel (Replacing the old Chart control)
-            chartPanel = new Panel { 
-                Location = new Point(20, 150), 
-                Size = new Size(740, 350), 
+            // Custom Chart Panel with Scrolling support
+            Panel chartContainer = new Panel {
+                Location = new Point(20, 150),
+                Size = new Size(740, 370), // Slightly taller to account for scrollbar
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right 
+                AutoScroll = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            };
+
+            chartPanel = new Panel { 
+                Location = new Point(0, 0), 
+                Size = new Size(720, 330), 
+                BackColor = Color.White
             };
             chartPanel.Paint += ChartPanel_Paint;
+            chartContainer.Controls.Add(chartPanel);
 
             Label lblChartTitle = new Label {
-                Text = "Appointments (Last 7 Days)",
+                Text = "Appointments (Last 30 Days)",
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Location = new Point(20, 125),
                 AutoSize = true
             };
 
             mainPanel.Controls.Add(lblChartTitle);
-            mainPanel.Controls.Add(chartPanel);
+            mainPanel.Controls.Add(chartContainer);
             mainPanel.Controls.Add(statsPanel);
 
             this.Controls.Add(mainPanel);
@@ -138,7 +146,7 @@ namespace SmartHospitalMS
         {
             if (chartData == null || chartData.Rows.Count == 0)
             {
-                e.Graphics.DrawString("No data available for the last 7 days", new Font("Segoe UI", 10), Brushes.Gray, 20, 20);
+                e.Graphics.DrawString("No data available for the last 30 days", new Font("Segoe UI", 10), Brushes.Gray, 20, 20);
                 return;
             }
 
@@ -146,9 +154,9 @@ namespace SmartHospitalMS
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             int margin = 40;
+            int barWidth = 80;
+            int spacing = 20;
             int chartHeight = chartPanel.Height - (margin * 2);
-            int chartWidth = chartPanel.Width - (margin * 2);
-            int barWidth = (chartWidth / Math.Max(1, chartData.Rows.Count)) - 10;
 
             // Find max value for scaling
             int maxVal = 1;
@@ -161,22 +169,36 @@ namespace SmartHospitalMS
                 string day = Convert.ToDateTime(chartData.Rows[i]["Day"]).ToString("MMM dd");
 
                 int h = (int)((float)val / maxVal * chartHeight);
-                int x = margin + (i * (barWidth + 10));
+                int x = margin + (i * (barWidth + spacing));
                 int y = chartPanel.Height - margin - h;
 
                 // Draw Bar
                 g.FillRectangle(new SolidBrush(Color.FromArgb(41, 128, 185)), x, y, barWidth, h);
                 
                 // Draw Value
-                g.DrawString(val.ToString(), new Font("Segoe UI", 8), Brushes.Black, x + (barWidth/4), y - 15);
+                g.DrawString(val.ToString(), new Font("Segoe UI", 8, FontStyle.Bold), Brushes.Black, x + (barWidth/3), y - 18);
                 
                 // Draw Label
                 g.DrawString(day, new Font("Segoe UI", 8), Brushes.Black, x, chartPanel.Height - margin + 5);
             }
 
             // Draw Axes
-            g.DrawLine(Pens.Black, margin, margin, margin, chartPanel.Height - margin); // Y
-            g.DrawLine(Pens.Black, margin, chartPanel.Height - margin, chartPanel.Width - margin, chartPanel.Height - margin); // X
+            g.DrawLine(new Pen(Color.Gray, 2), margin, margin, margin, chartPanel.Height - margin); // Y
+            g.DrawLine(new Pen(Color.Gray, 2), margin, chartPanel.Height - margin, chartPanel.Width - margin, chartPanel.Height - margin); // X
+        }
+
+        private void UpdateChartSize()
+        {
+            if (chartData == null || chartData.Rows.Count == 0) return;
+
+            int margin = 40;
+            int barWidth = 80;
+            int spacing = 20;
+            int requiredWidth = margin + (chartData.Rows.Count * (barWidth + spacing)) + margin;
+
+            // Ensure we use at least the container width
+            int containerWidth = chartPanel.Parent != null ? chartPanel.Parent.Width : 740;
+            chartPanel.Width = Math.Max(requiredWidth, containerWidth - 5);
         }
 
         private Button CreateNavButton(string text, int yPos)
@@ -203,26 +225,39 @@ namespace SmartHospitalMS
             return p;
         }
 
-        private void LoadStats()
+        private async void LoadStats()
         {
             try {
-                lblTotalPatients.Text = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Patients").ToString();
-                lblTotalDoctors.Text = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Doctors").ToString();
-                lblTodayAppointments.Text = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Appointments WHERE CAST(AppointmentDate AS DATE) = CAST(GETDATE() AS DATE)").ToString();
-                
-                object rev = DatabaseHelper.ExecuteScalar("SELECT SUM(TotalAmount) FROM Bills");
-                lblTotalRevenue.Text = rev == DBNull.Value ? "$0" : string.Format("{0:C0}", rev);
+                // Multi-threading: Running DB queries on a background thread to keep UI responsive
+                await Task.Run(() => {
+                    string patients = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Patients").ToString();
+                    string doctors = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Doctors").ToString();
+                    string appts = DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Appointments WHERE CAST(AppointmentDate AS DATE) = CAST(GETDATE() AS DATE)").ToString();
+                    
+                    object revResult = DatabaseHelper.ExecuteScalar("SELECT SUM(TotalAmount) FROM Bills");
+                    string revenue = revResult == DBNull.Value ? "$0" : string.Format("{0:C0}", revResult);
 
-                // Load Chart Data
-                chartData = DatabaseHelper.ExecuteQuery(@"
-                    SELECT TOP 7 CAST(AppointmentDate AS DATE) as Day, COUNT(*) as Count 
-                    FROM Appointments 
-                    GROUP BY CAST(AppointmentDate AS DATE) 
-                    ORDER BY Day ASC");
+                    DataTable cData = DatabaseHelper.ExecuteQuery(@"
+                        SELECT Day, Count FROM (
+                            SELECT TOP 30 CAST(AppointmentDate AS DATE) as Day, COUNT(*) as Count 
+                            FROM Appointments 
+                            GROUP BY CAST(AppointmentDate AS DATE) 
+                            ORDER BY Day DESC
+                        ) t ORDER BY Day ASC");
 
-                chartPanel.Invalidate(); // Refresh the chart panel to trigger Paint event
-            } catch (Exception ex) {
-                // Silent fail for empty DB
+                    // Invoke back to UI thread to update labels
+                    this.Invoke((MethodInvoker)delegate {
+                        lblTotalPatients.Text = patients;
+                        lblTotalDoctors.Text = doctors;
+                        lblTodayAppointments.Text = appts;
+                        lblTotalRevenue.Text = revenue;
+                        chartData = cData;
+                        UpdateChartSize();
+                        chartPanel.Invalidate();
+                    });
+                });
+            } catch (Exception) {
+                // Silent fail for empty DB or network issues
             }
         }
 

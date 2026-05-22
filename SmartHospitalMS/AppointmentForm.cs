@@ -207,6 +207,11 @@ namespace SmartHospitalMS
                 return;
             }
 
+            if (dtpDate.Value < DateTime.Now) {
+                MessageBox.Show("Cannot book an appointment in the past!", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try {
                 // Block duplicate
                 string checkQuery = "SELECT COUNT(*) FROM Appointments WHERE PatientID=@pid AND DoctorID=@did AND CAST(AppointmentDate AS DATE) = @date";
@@ -268,7 +273,8 @@ namespace SmartHospitalMS
 
             if (MessageBox.Show("Delete this appointment?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes) {
                 try {
-                    DatabaseHelper.ExecuteNonQuery("DELETE FROM Appointments WHERE AppointmentID=" + selectedAppointmentID);
+                    string query = "DELETE FROM Appointments WHERE AppointmentID=@id";
+                    DatabaseHelper.ExecuteNonQuery(query, new SqlParameter[] { new SqlParameter("@id", selectedAppointmentID) });
                     MessageBox.Show("Deleted.");
                     ClearFields();
                     LoadAppointments();

@@ -18,6 +18,11 @@ namespace SmartHospitalMS
         public string Contact { get; set; }
         public string Address { get; set; }
         public string DoctorAssigned { get; set; }
+
+        public override string GetSummary()
+        {
+            return $"Patient: {FullName} ({Gender}), Age: {Age}, Contact: {Contact}";
+        }
     }
 
     public class Doctor : BaseEntity
@@ -26,6 +31,11 @@ namespace SmartHospitalMS
         public string Specialization { get; set; }
         public string Contact { get; set; }
         public string Email { get; set; }
+
+        public override string GetSummary()
+        {
+            return $"Dr. {FullName} - {Specialization}";
+        }
     }
 
     public class Appointment : BaseEntity

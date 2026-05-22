@@ -24,5 +24,13 @@ namespace SmartHospitalMS
         {
             _createdAt = DateTime.Now;
         }
+
+        /// <summary>
+        /// Polymorphism: Virtual method to be overridden by child classes.
+        /// </summary>
+        public virtual string GetSummary()
+        {
+            return $"Entity ID: {ID}, Created: {CreatedAt}";
+        }
     }
 }

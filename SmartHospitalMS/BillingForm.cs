@@ -149,6 +149,11 @@ namespace SmartHospitalMS
                 if (!decimal.TryParse(txtLabFee.Text, out decimal lab)) lab = 0;
                 if (!decimal.TryParse(txtTax.Text, out decimal taxPerc)) taxPerc = 0;
 
+                if (con < 0 || med < 0 || lab < 0 || taxPerc < 0) {
+                    MessageBox.Show("Fees and tax cannot be negative!", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return 0;
+                }
+
                 decimal subtotal = con + med + lab;
                 decimal total = subtotal + (subtotal * (taxPerc / 100));
                 
