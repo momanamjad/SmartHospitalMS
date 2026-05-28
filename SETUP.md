@@ -46,7 +46,6 @@ sqlcmd -S "(localdb)\MSSQLLocalDB" -d HospitalDB -i SmartHospitalMS/SecurityUpda
 ```
 
 ---
-
 ## 🏃 Step 3: Running the App
 
 ### The "One Click" Way
