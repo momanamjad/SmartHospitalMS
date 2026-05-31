@@ -36,91 +36,135 @@ namespace SmartHospitalMS
 
         private void SetupUI()
         {
-            this.BackColor = Color.White;
+            this.BackColor = UIStyles.LightBackground;
+            this.DoubleBuffered = true;
 
-            // 1. Input Panel (LEFT)
-            Panel pnlInputs = new Panel { 
-                Location = new Point(0, 0),
-                Size = new Size(320, 700),
-                BackColor = Color.WhiteSmoke, 
-                Padding = new Padding(15),
-                BorderStyle = BorderStyle.FixedSingle,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+            // Main Layout Container
+            TableLayoutPanel mainLayout = new TableLayoutPanel {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1
+            };
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 350F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            this.Controls.Add(mainLayout);
+
+            // 1. Sidebar Input Panel
+            Panel pnlSide = new Panel { 
+                Dock = DockStyle.Fill,
+                BackColor = Color.White, 
+                Padding = new Padding(20),
+                BorderStyle = BorderStyle.None
+            };
+            mainLayout.Controls.Add(pnlSide, 0, 0);
+            
+            Panel pnlSideScroll = new Panel {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
             };
 
-            int y = 20;
-            
-            // Token (Read-only)
-            pnlInputs.Controls.Add(new Label { Text = "Token Number:", Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            txtToken = new TextBox { Location = new Point(130, y), Size = new Size(160, 25), ReadOnly = true, BackColor = Color.LightYellow };
-            pnlInputs.Controls.Add(txtToken);
-            y += 40;
+            Label lblInputTitle = new Label { 
+                Text = "APPOINTMENT DETAILS", 
+                Font = UIStyles.SubHeaderFont, 
+                ForeColor = UIStyles.PrimaryColor, 
+                Dock = DockStyle.Top, 
+                Height = 40 
+            };
+            pnlSide.Controls.Add(pnlSideScroll);
+            pnlSide.Controls.Add(lblInputTitle);
 
-            // Patient Dropdown
-            pnlInputs.Controls.Add(new Label { Text = "Select Patient:", Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            cmbPatient = new ComboBox { Location = new Point(130, y), Size = new Size(160, 25), DropDownStyle = ComboBoxStyle.DropDownList };
-            pnlInputs.Controls.Add(cmbPatient);
-            y += 40;
+            TableLayoutPanel tlpInputs = new TableLayoutPanel {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                ColumnCount = 1,
+                RowCount = 10,
+                Padding = new Padding(0, 10, 20, 10)
+            };
+            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-            // Doctor Dropdown
-            pnlInputs.Controls.Add(new Label { Text = "Select Doctor:", Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            cmbDoctor = new ComboBox { Location = new Point(130, y), Size = new Size(160, 25), DropDownStyle = ComboBoxStyle.DropDownList };
-            pnlInputs.Controls.Add(cmbDoctor);
-            y += 40;
+            tlpInputs.Controls.Add(new Label { Text = "Token Number", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true });
+            txtToken = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, ReadOnly = true, BackColor = Color.LightYellow, Margin = new Padding(0, 0, 0, 15) };
+            tlpInputs.Controls.Add(txtToken);
 
-            // Date Picker
-            pnlInputs.Controls.Add(new Label { Text = "Date & Time:", Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            dtpDate = new DateTimePicker { Location = new Point(130, y), Size = new Size(160, 25), Format = DateTimePickerFormat.Custom, CustomFormat = "MM/dd/yyyy hh:mm tt" };
-            pnlInputs.Controls.Add(dtpDate);
-            y += 40;
+            tlpInputs.Controls.Add(new Label { Text = "Select Patient", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true });
+            cmbPatient = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList, Margin = new Padding(0, 0, 0, 15) };
+            tlpInputs.Controls.Add(cmbPatient);
 
-            // Status
-            pnlInputs.Controls.Add(new Label { Text = "Status:", Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            cmbStatus = new ComboBox { Location = new Point(130, y), Size = new Size(160, 25), DropDownStyle = ComboBoxStyle.DropDownList };
+            tlpInputs.Controls.Add(new Label { Text = "Select Doctor", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true });
+            cmbDoctor = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList, Margin = new Padding(0, 0, 0, 15) };
+            tlpInputs.Controls.Add(cmbDoctor);
+
+            tlpInputs.Controls.Add(new Label { Text = "Date & Time", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true });
+            dtpDate = new DateTimePicker { Dock = DockStyle.Top, Font = UIStyles.RegularFont, Format = DateTimePickerFormat.Custom, CustomFormat = "MM/dd/yyyy hh:mm tt", Margin = new Padding(0, 0, 0, 15) };
+            tlpInputs.Controls.Add(dtpDate);
+
+            tlpInputs.Controls.Add(new Label { Text = "Status", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true });
+            cmbStatus = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList, Margin = new Padding(0, 0, 0, 15) };
             cmbStatus.Items.AddRange(new string[] { "Pending", "Confirmed", "Cancelled", "Completed" });
             cmbStatus.SelectedIndex = 0;
-            pnlInputs.Controls.Add(cmbStatus);
-            y += 50;
+            tlpInputs.Controls.Add(cmbStatus);
 
-            btnBook = new Button { Text = "Book Appt", Location = new Point(15, y), Size = new Size(90, 40), BackColor = Color.Green, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
-            btnUpdate = new Button { Text = "Update", Location = new Point(110, y), Size = new Size(90, 40), BackColor = Color.Orange, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
-            btnCancel = new Button { Text = "Delete", Location = new Point(205, y), Size = new Size(90, 40), BackColor = Color.Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            pnlSideScroll.Controls.Add(tlpInputs);
+
+            // Action Buttons
+            FlowLayoutPanel flpButtons = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 100, Padding = new Padding(0, 10, 0, 0) };
+            btnBook = CreateActionButton("Book Appt", UIStyles.AccentColor);
+            btnUpdate = CreateActionButton("Update", Color.Orange);
+            btnCancel = CreateActionButton("Delete", UIStyles.DangerColor);
             
-            y += 50;
-            btnClear = new Button { Text = "Clear Fields", Location = new Point(15, y), Size = new Size(280, 35), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9) };
+            flpButtons.Controls.AddRange(new Control[] { btnBook, btnUpdate, btnCancel });
+            pnlSideScroll.Controls.Add(flpButtons);
+
+            btnClear = new Button { 
+                Text = "Clear Fields", 
+                Dock = DockStyle.Top, 
+                Height = 35, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont,
+                ForeColor = UIStyles.TextSecondary
+            };
+            btnClear.FlatAppearance.BorderSize = 0;
+            pnlSideScroll.Controls.Add(btnClear);
+
+            // 2. Main Grid Area
+            Panel pnlMain = new Panel { Dock = DockStyle.Fill, Padding = new Padding(25) };
+            mainLayout.Controls.Add(pnlMain, 1, 0);
+            
+            Panel pnlSearch = new Panel { Dock = DockStyle.Top, Height = 60 };
+            Label lblSearch = new Label { Text = "SEARCH APPOINTMENTS", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 20 };
+            txtSearch = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont };
+            txtSearch.TextChanged += (s, e) => LoadAppointments(txtSearch.Text.Trim());
+            pnlSearch.Controls.Add(txtSearch);
+            pnlSearch.Controls.Add(lblSearch);
+
+            dgvAppointments = new DataGridView { 
+                Dock = DockStyle.Fill,
+                Margin = new Padding(0, 20, 0, 0)
+            };
+            UIStyles.ApplyModernStyle(dgvAppointments);
+            dgvAppointments.CellClick += DgvAppointments_CellClick;
+
+            pnlMain.Controls.Add(dgvAppointments);
+            pnlMain.Controls.Add(pnlSearch);
 
             btnBook.Click += BtnBook_Click;
             btnUpdate.Click += BtnUpdate_Click;
             btnCancel.Click += BtnDelete_Click;
             btnClear.Click += (s, e) => ClearFields();
+        }
 
-            pnlInputs.Controls.AddRange(new Control[] { btnBook, btnUpdate, btnCancel, btnClear });
-            this.Controls.Add(pnlInputs);
-
-            // 2. Grid Area (RIGHT) - FIXED LAYOUT
-            // Requirement: Grid must start after the input panel (x=340) and not overlap
-            Label lblSearch = new Label { Text = "Search Appointments:", Location = new Point(340, 20), AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            txtSearch = new TextBox { Location = new Point(500, 18), Size = new Size(400, 25) };
-            txtSearch.TextChanged += (s, e) => LoadAppointments(txtSearch.Text.Trim());
-
-            dgvAppointments = new DataGridView { 
-                Location = new Point(340, 60), 
-                Size = new Size(820, 580), 
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.Fixed3D,
-                AllowUserToAddRows = false,
-                RowHeadersVisible = false
+        private Button CreateActionButton(string text, Color color)
+        {
+            Button btn = new Button { 
+                Text = text, 
+                Size = new Size(95, 38), 
+                BackColor = color, 
+                ForeColor = Color.White, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont 
             };
-            dgvAppointments.CellClick += DgvAppointments_CellClick;
-
-            this.Controls.Add(lblSearch);
-            this.Controls.Add(txtSearch);
-            this.Controls.Add(dgvAppointments);
+            btn.FlatAppearance.BorderSize = 0;
+            return btn;
         }
 
         private void LoadData()

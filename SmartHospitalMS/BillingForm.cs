@@ -34,82 +34,133 @@ namespace SmartHospitalMS
 
         private void SetupUI()
         {
-            this.BackColor = Color.White;
+            this.BackColor = UIStyles.LightBackground;
+            this.DoubleBuffered = true;
 
-            // 1. Billing Panel (LEFT)
-            Panel pnlBill = new Panel { 
-                Location = new Point(0, 0),
-                Size = new Size(350, 700),
-                BackColor = Color.WhiteSmoke, 
+            // Main Layout Container
+            TableLayoutPanel mainLayout = new TableLayoutPanel {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1
+            };
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 350F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            this.Controls.Add(mainLayout);
+
+            // 1. Sidebar Billing Panel
+            Panel pnlSide = new Panel { 
+                Dock = DockStyle.Fill,
+                BackColor = Color.White, 
                 Padding = new Padding(20),
-                BorderStyle = BorderStyle.FixedSingle,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+                BorderStyle = BorderStyle.None
+            };
+            mainLayout.Controls.Add(pnlSide, 0, 0);
+            
+            Panel pnlSideScroll = new Panel {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
             };
 
-            int y = 20;
-            Label lblHeader = new Label { Text = "GENERATE INVOICE", Font = new Font("Segoe UI", 12, FontStyle.Bold), Location = new Point(20, y), AutoSize = true };
-            pnlBill.Controls.Add(lblHeader);
-            y += 40;
+            Label lblHeader = new Label { 
+                Text = "GENERATE INVOICE", 
+                Font = UIStyles.SubHeaderFont, 
+                ForeColor = UIStyles.PrimaryColor, 
+                Dock = DockStyle.Top, 
+                Height = 40 
+            };
+            pnlSide.Controls.Add(pnlSideScroll);
+            pnlSide.Controls.Add(lblHeader);
 
-            lblToken = new Label { Text = "Token: Select an appointment", Font = new Font("Segoe UI", 9, FontStyle.Italic), Location = new Point(20, y), AutoSize = true };
-            pnlBill.Controls.Add(lblToken);
-            y += 25;
+            lblToken = new Label { Text = "Token: Select an appointment", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
+            pnlSideScroll.Controls.Add(lblToken);
 
-            lblPatientName = new Label { Text = "Patient: ---", Font = new Font("Segoe UI", 10, FontStyle.Bold), Location = new Point(20, y), AutoSize = true };
-            pnlBill.Controls.Add(lblPatientName);
-            y += 40;
+            lblPatientName = new Label { Text = "Patient: ---", Font = UIStyles.RegularFont, ForeColor = UIStyles.TextPrimary, Dock = DockStyle.Top, Height = 35 };
+            pnlSideScroll.Controls.Add(lblPatientName);
 
-            txtConsultationFee = CreateBillingInput(pnlBill, "Consultation Fee:", "500", ref y);
-            txtMedicineFee = CreateBillingInput(pnlBill, "Medicine Fee:", "0", ref y);
-            txtLabFee = CreateBillingInput(pnlBill, "Lab/Test Fee:", "0", ref y);
-            txtTax = CreateBillingInput(pnlBill, "Tax (%):", "5", ref y);
+            TableLayoutPanel tlpInputs = new TableLayoutPanel {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                ColumnCount = 1,
+                RowCount = 8,
+                Padding = new Padding(0, 10, 20, 10)
+            };
+            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
+            txtConsultationFee = CreateBillingInputModern(tlpInputs, "Consultation Fee", "500");
+            txtMedicineFee = CreateBillingInputModern(tlpInputs, "Medicine Fee", "0");
+            txtLabFee = CreateBillingInputModern(tlpInputs, "Lab/Test Fee", "0");
+            txtTax = CreateBillingInputModern(tlpInputs, "Tax (%)", "5");
+
+            pnlSideScroll.Controls.Add(tlpInputs);
+
+            Panel pnlTotal = new Panel { Dock = DockStyle.Top, Height = 60, Padding = new Padding(0, 10, 0, 0) };
+            Label lblTotalText = new Label { Text = "TOTAL AMOUNT", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 20 };
+            txtTotal = new TextBox { Dock = DockStyle.Top, Font = UIStyles.SubHeaderFont, ReadOnly = true, BackColor = Color.LightCyan, ForeColor = UIStyles.PrimaryColor };
+            pnlTotal.Controls.Add(txtTotal);
+            pnlTotal.Controls.Add(lblTotalText);
+            pnlSideScroll.Controls.Add(pnlTotal);
+
+            // Action Buttons
+            FlowLayoutPanel flpButtons = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 60, Padding = new Padding(0, 10, 0, 0) };
+            btnCalculate = CreateActionButton("Calculate", UIStyles.PrimaryColor);
+            btnSaveBill = CreateActionButton("Save Bill", UIStyles.AccentColor);
+            flpButtons.Controls.AddRange(new Control[] { btnCalculate, btnSaveBill });
+            pnlSideScroll.Controls.Add(flpButtons);
+
+            btnPrint = new Button { 
+                Text = "PRINT INVOICE (.TXT)", 
+                Dock = DockStyle.Top, 
+                Height = 45, 
+                BackColor = UIStyles.SecondaryColor, 
+                ForeColor = Color.White, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont,
+                Margin = new Padding(0, 10, 0, 0)
+            };
+            btnPrint.FlatAppearance.BorderSize = 0;
+            pnlSideScroll.Controls.Add(btnPrint);
+
+            // 2. Main Grid Area
+            Panel pnlMain = new Panel { Dock = DockStyle.Fill, Padding = new Padding(25) };
+            mainLayout.Controls.Add(pnlMain, 1, 0);
+
+            Label lblGridTitle = new Label { Text = "COMPLETED APPOINTMENTS AWAITING BILLING", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 30 };
             
-            y += 10;
-            Label lblTotalText = new Label { Text = "TOTAL AMOUNT:", Font = new Font("Segoe UI", 10, FontStyle.Bold), Location = new Point(20, y), AutoSize = true };
-            pnlBill.Controls.Add(lblTotalText);
-            txtTotal = new TextBox { Location = new Point(150, y), Size = new Size(160, 25), ReadOnly = true, BackColor = Color.LightCyan, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            pnlBill.Controls.Add(txtTotal);
-            y += 50;
+            dgvAppointments = new DataGridView { 
+                Dock = DockStyle.Fill,
+                Margin = new Padding(0, 10, 0, 0)
+            };
+            UIStyles.ApplyModernStyle(dgvAppointments);
+            dgvAppointments.CellClick += DgvAppointments_CellClick;
 
-            btnCalculate = new Button { Text = "Calculate", Location = new Point(20, y), Size = new Size(140, 40), FlatStyle = FlatStyle.Flat, BackColor = Color.SteelBlue, ForeColor = Color.White };
-            btnSaveBill = new Button { Text = "Save Bill", Location = new Point(170, y), Size = new Size(140, 40), FlatStyle = FlatStyle.Flat, BackColor = Color.Green, ForeColor = Color.White };
-            y += 50;
-            btnPrint = new Button { Text = "Print Invoice (.txt)", Location = new Point(20, y), Size = new Size(290, 40), FlatStyle = FlatStyle.Flat, BackColor = Color.DarkSlateGray, ForeColor = Color.White };
+            pnlMain.Controls.Add(dgvAppointments);
+            pnlMain.Controls.Add(lblGridTitle);
 
             btnCalculate.Click += (s, e) => CalculateTotal();
             btnSaveBill.Click += BtnSaveBill_Click;
             btnPrint.Click += BtnPrint_Click;
-
-            pnlBill.Controls.AddRange(new Control[] { btnCalculate, btnSaveBill, btnPrint });
-            this.Controls.Add(pnlBill);
-
-            // 2. Grid Area (RIGHT)
-            Label lblGridTitle = new Label { Text = "Completed Appointments Awaiting Billing:", Location = new Point(370, 20), AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            dgvAppointments = new DataGridView { 
-                Location = new Point(370, 50), 
-                Size = new Size(790, 590), 
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                AllowUserToAddRows = false,
-                RowHeadersVisible = false
-            };
-            dgvAppointments.CellClick += DgvAppointments_CellClick;
-
-            this.Controls.Add(lblGridTitle);
-            this.Controls.Add(dgvAppointments);
         }
 
-        private TextBox CreateBillingInput(Panel p, string label, string defVal, ref int y)
+        private TextBox CreateBillingInputModern(TableLayoutPanel tlp, string label, string defVal)
         {
-            p.Controls.Add(new Label { Text = label, Location = new Point(20, y), AutoSize = true });
-            TextBox tb = new TextBox { Text = defVal, Location = new Point(150, y), Size = new Size(160, 25) };
-            p.Controls.Add(tb);
-            y += 35;
+            tlp.Controls.Add(new Label { Text = label, Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true, Margin = new Padding(0, 5, 0, 0) });
+            TextBox tb = new TextBox { Text = defVal, Dock = DockStyle.Top, Font = UIStyles.RegularFont, Margin = new Padding(0, 0, 0, 10) };
+            tlp.Controls.Add(tb);
             return tb;
+        }
+
+        private Button CreateActionButton(string text, Color color)
+        {
+            Button btn = new Button { 
+                Text = text, 
+                Size = new Size(145, 38), 
+                BackColor = color, 
+                ForeColor = Color.White, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont 
+            };
+            btn.FlatAppearance.BorderSize = 0;
+            return btn;
         }
 
         private void LoadCompletedAppointments()

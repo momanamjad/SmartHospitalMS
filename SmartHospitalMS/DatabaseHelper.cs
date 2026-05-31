@@ -18,10 +18,17 @@ namespace SmartHospitalMS
         /// </summary>
         public static SqlConnection GetConnection()
         {
-            SqlConnection conn = new SqlConnection(connectionString);
-            if (conn.State != ConnectionState.Open)
-                conn.Open();
-            return conn;
+            try
+            {
+                SqlConnection conn = new SqlConnection(connectionString);
+                if (conn.State != ConnectionState.Open)
+                    conn.Open();
+                return conn;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception("Could not connect to database. Please ensure 'sqllocaldb start MSSQLLocalDB' has been run and the database 'HospitalDB' exists. Error: " + ex.Message);
+            }
         }
 
         /// <summary>

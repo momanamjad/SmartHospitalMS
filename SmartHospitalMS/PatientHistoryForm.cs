@@ -22,42 +22,51 @@ namespace SmartHospitalMS
 
         private void SetupUI()
         {
-            this.Text = $"History: {_patientName}";
-            this.Size = new Size(900, 600);
+            this.Text = $"Medical History: {_patientName}";
+            this.Size = new Size(1000, 700);
             this.StartPosition = FormStartPosition.CenterParent;
-            this.BackColor = Color.White;
+            this.BackColor = UIStyles.LightBackground;
+            this.DoubleBuffered = true;
 
+            Panel pnlHeader = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Color.White, Padding = new Padding(20) };
             Label lblTitle = new Label { 
-                Text = $"Medical & Billing History for {_patientName}", 
-                Font = new Font("Segoe UI", 14, FontStyle.Bold), 
-                Location = new Point(20, 20), 
-                AutoSize = true,
-                ForeColor = Color.SteelBlue
+                Text = $"HISTORY: {_patientName.ToUpper()}", 
+                Font = UIStyles.SubHeaderFont, 
+                ForeColor = UIStyles.PrimaryColor, 
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft
             };
+            pnlHeader.Controls.Add(lblTitle);
 
-            Label lblAppts = new Label { Text = "Appointment History:", Location = new Point(20, 60), Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            dgvAppointments = new DataGridView { 
-                Location = new Point(20, 85), 
-                Size = new Size(840, 200), 
-                ReadOnly = true, 
-                AllowUserToAddRows = false, 
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor = Color.WhiteSmoke,
-                RowHeadersVisible = false
+            Panel pnlContent = new Panel { Dock = DockStyle.Fill, Padding = new Padding(25) };
+
+            TableLayoutPanel tlp = new TableLayoutPanel { 
+                Dock = DockStyle.Fill, 
+                ColumnCount = 1, 
+                RowCount = 4 
             };
+            tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 
-            Label lblBills = new Label { Text = "Billing History:", Location = new Point(20, 300), Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            dgvBills = new DataGridView { 
-                Location = new Point(20, 325), 
-                Size = new Size(840, 200), 
-                ReadOnly = true, 
-                AllowUserToAddRows = false, 
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor = Color.WhiteSmoke,
-                RowHeadersVisible = false
-            };
+            Label lblAppts = new Label { Text = "APPOINTMENT RECORD", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Bottom };
+            dgvAppointments = new DataGridView { Dock = DockStyle.Fill };
+            UIStyles.ApplyModernStyle(dgvAppointments);
 
-            this.Controls.AddRange(new Control[] { lblTitle, lblAppts, dgvAppointments, lblBills, dgvBills });
+            Label lblBills = new Label { Text = "BILLING RECORD", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Bottom };
+            dgvBills = new DataGridView { Dock = DockStyle.Fill };
+            UIStyles.ApplyModernStyle(dgvBills);
+
+            tlp.Controls.Add(lblAppts, 0, 0);
+            tlp.Controls.Add(dgvAppointments, 0, 1);
+            tlp.Controls.Add(lblBills, 0, 2);
+            tlp.Controls.Add(dgvBills, 0, 3);
+
+            pnlContent.Controls.Add(tlp);
+
+            this.Controls.Add(pnlContent);
+            this.Controls.Add(pnlHeader);
         }
 
         private void LoadHistory()

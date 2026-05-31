@@ -38,7 +38,8 @@ namespace SmartHospitalMS
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.ClientSize = new System.Drawing.Size(1200, 800);
+            this.MinimumSize = new System.Drawing.Size(1000, 700);
             this.Name = "Dashboard";
             this.Text = "Smart Hospital MS - Dashboard";
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -47,22 +48,33 @@ namespace SmartHospitalMS
 
         private void SetupDashboard()
         {
+            this.BackColor = UIStyles.LightBackground;
+            this.DoubleBuffered = true;
+
             // 1. Header Panel
-            headerPanel = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Color.FromArgb(41, 128, 185) };
+            headerPanel = new Panel { 
+                Dock = DockStyle.Top, 
+                Height = 70, 
+                BackColor = UIStyles.PrimaryColor,
+                Padding = new Padding(20, 0, 20, 0)
+            };
+            this.Controls.Add(headerPanel);
             
             Label lblTitle = new Label { 
-                Text = "SMART HOSPITAL MANAGEMENT SYSTEM", 
+                Text = "SMART HOSPITAL MS", 
                 ForeColor = Color.White, 
-                Font = new Font("Segoe UI", 14, FontStyle.Bold), 
-                Location = new Point(20, 15), 
+                Font = UIStyles.HeaderFont, 
+                Dock = DockStyle.Left,
+                TextAlign = ContentAlignment.MiddleLeft,
                 AutoSize = true 
             };
 
             lblClock = new Label { 
                 Text = DateTime.Now.ToString("HH:mm:ss"), 
                 ForeColor = Color.White, 
-                Font = new Font("Segoe UI", 12), 
-                Location = new Point(850, 18), 
+                Font = UIStyles.SubHeaderFont, 
+                Dock = DockStyle.Right,
+                TextAlign = ContentAlignment.MiddleRight,
                 AutoSize = true 
             };
 
@@ -73,22 +85,54 @@ namespace SmartHospitalMS
             headerPanel.Controls.Add(lblTitle);
             headerPanel.Controls.Add(lblClock);
 
+            // Main Body Layout (Below Header)
+            TableLayoutPanel mainBodyLayout = new TableLayoutPanel {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1
+            };
+            mainBodyLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
+            mainBodyLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            this.Controls.Add(mainBodyLayout);
+            mainBodyLayout.BringToFront(); // Ensure it's not covered by Header if docked Top
+
             // 2. Side Navigation
-            sidePanel = new Panel { Dock = DockStyle.Left, Width = 200, BackColor = Color.FromArgb(44, 62, 80) };
+            sidePanel = new Panel { 
+                Dock = DockStyle.Fill, 
+                BackColor = UIStyles.SecondaryColor,
+                Padding = new Padding(0, 20, 0, 0)
+            };
+            mainBodyLayout.Controls.Add(sidePanel, 0, 0);
             
-            lblUser = new Label { 
-                Text = $"User: {Session.CurrentUser?.Username}\nRole: {Session.CurrentUser?.Role}", 
-                ForeColor = Color.White, 
-                Location = new Point(10, 20), 
-                Size = new Size(180, 40) 
+            Panel sideScroll = new Panel {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
             };
 
-            Button btnDash = CreateNavButton("Dashboard", 80);
-            Button btnPatients = CreateNavButton("Patients", 130);
-            Button btnAppointments = CreateNavButton("Appointments", 180);
-            Button btnBilling = CreateNavButton("Billing", 230);
-            Button btnTheme = CreateNavButton("Toggle Theme", 450);
-            Button btnLogout = CreateNavButton("Logout", 500);
+            lblUser = new Label { 
+                Text = $"{Session.CurrentUser?.Username}\n({Session.CurrentUser?.Role})", 
+                ForeColor = Color.White, 
+                Font = UIStyles.RegularFont,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Top,
+                Height = 60
+            };
+
+            Panel navContainer = new Panel { Dock = DockStyle.Top, AutoSize = true, Padding = new Padding(0, 20, 0, 0) };
+            
+            Button btnDash = CreateNavButton("Dashboard", 0);
+            Button btnPatients = CreateNavButton("Patients", 50);
+            Button btnAppointments = CreateNavButton("Appointments", 100);
+            Button btnBilling = CreateNavButton("Billing", 150);
+            Button btnTheme = CreateNavButton("Toggle Theme", 200);
+            Button btnLogout = CreateNavButton("Logout", 250);
+
+            btnDash.Dock = DockStyle.Top;
+            btnPatients.Dock = DockStyle.Top;
+            btnAppointments.Dock = DockStyle.Top;
+            btnBilling.Dock = DockStyle.Top;
+            btnTheme.Dock = DockStyle.Top;
+            btnLogout.Dock = DockStyle.Top;
 
             btnPatients.Click += (s, e) => { new PatientForm().ShowDialog(); LoadStats(); };
             btnAppointments.Click += (s, e) => { new AppointmentForm().ShowDialog(); LoadStats(); };
@@ -96,26 +140,59 @@ namespace SmartHospitalMS
             btnTheme.Click += (s, e) => ToggleTheme();
             btnLogout.Click += (s, e) => { Session.Logout(); this.Hide(); new LoginForm().Show(); };
 
-            sidePanel.Controls.AddRange(new Control[] { lblUser, btnDash, btnPatients, btnAppointments, btnBilling, btnTheme, btnLogout });
+            navContainer.Controls.AddRange(new Control[] { btnLogout, btnTheme, btnBilling, btnAppointments, btnPatients, btnDash });
+
+            sideScroll.Controls.Add(navContainer);
+            sidePanel.Controls.Add(sideScroll);
+            sidePanel.Controls.Add(lblUser);
 
             // 3. Main Content Area
-            mainPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.WhiteSmoke, Padding = new Padding(20) };
+            mainPanel = new Panel { 
+                Dock = DockStyle.Fill, 
+                BackColor = UIStyles.LightBackground, 
+                Padding = new Padding(25),
+                AutoScroll = true
+            };
+            mainBodyLayout.Controls.Add(mainPanel, 1, 0);
 
-            // Stats Cards
-            FlowLayoutPanel statsPanel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 120 };
-            statsPanel.Controls.Add(CreateStatCard("Patients", out lblTotalPatients, Color.FromArgb(52, 152, 219)));
-            statsPanel.Controls.Add(CreateStatCard("Doctors", out lblTotalDoctors, Color.FromArgb(46, 204, 113)));
-            statsPanel.Controls.Add(CreateStatCard("Appointments", out lblTodayAppointments, Color.FromArgb(155, 89, 182)));
-            statsPanel.Controls.Add(CreateStatCard("Revenue", out lblTotalRevenue, Color.FromArgb(230, 126, 34)));
+            // Stats Cards - Responsive Grid
+            TableLayoutPanel statsGrid = new TableLayoutPanel { 
+                Dock = DockStyle.Top, 
+                Height = 140,
+                ColumnCount = 4,
+                RowCount = 1
+            };
+            statsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
 
-            // Custom Chart Panel with Scrolling support
+            statsGrid.Controls.Add(CreateStatCard("Patients", out lblTotalPatients, UIStyles.PrimaryColor), 0, 0);
+            statsGrid.Controls.Add(CreateStatCard("Doctors", out lblTotalDoctors, UIStyles.AccentColor), 1, 0);
+            statsGrid.Controls.Add(CreateStatCard("Appointments", out lblTodayAppointments, Color.FromArgb(155, 89, 182)), 2, 0);
+            statsGrid.Controls.Add(CreateStatCard("Revenue", out lblTotalRevenue, Color.FromArgb(230, 126, 34)), 3, 0);
+
+            // Chart Section
+            Panel chartSection = new Panel {
+                Dock = DockStyle.Top,
+                Height = 500,
+                Padding = new Padding(0, 20, 0, 0)
+            };
+
+            Label lblChartTitle = new Label {
+                Text = "Appointments (Last 30 Days)",
+                Font = UIStyles.SubHeaderFont,
+                ForeColor = UIStyles.TextPrimary,
+                Dock = DockStyle.Top,
+                Height = 40,
+                TextAlign = ContentAlignment.BottomLeft
+            };
+
             Panel chartContainer = new Panel {
-                Location = new Point(20, 150),
-                Size = new Size(740, 370), // Slightly taller to account for scrollbar
+                Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
                 AutoScroll = true,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                Padding = new Padding(10)
             };
 
             chartPanel = new Panel { 
@@ -126,36 +203,27 @@ namespace SmartHospitalMS
             chartPanel.Paint += ChartPanel_Paint;
             chartContainer.Controls.Add(chartPanel);
 
-            Label lblChartTitle = new Label {
-                Text = "Appointments (Last 30 Days)",
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                Location = new Point(20, 125),
-                AutoSize = true
-            };
+            chartSection.Controls.Add(chartContainer);
+            chartSection.Controls.Add(lblChartTitle);
 
-            mainPanel.Controls.Add(lblChartTitle);
-            mainPanel.Controls.Add(chartContainer);
-            mainPanel.Controls.Add(statsPanel);
-
-            this.Controls.Add(mainPanel);
-            this.Controls.Add(sidePanel);
-            this.Controls.Add(headerPanel);
+            mainPanel.Controls.Add(chartSection);
+            mainPanel.Controls.Add(statsGrid);
         }
 
         private void ChartPanel_Paint(object sender, PaintEventArgs e)
         {
             if (chartData == null || chartData.Rows.Count == 0)
             {
-                e.Graphics.DrawString("No data available for the last 30 days", new Font("Segoe UI", 10), Brushes.Gray, 20, 20);
+                e.Graphics.DrawString("No data available for the last 30 days", UIStyles.RegularFont, Brushes.Gray, 20, 20);
                 return;
             }
 
             Graphics g = e.Graphics;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            int margin = 40;
-            int barWidth = 80;
-            int spacing = 20;
+            int margin = 50;
+            int barWidth = 60;
+            int spacing = 30;
             int chartHeight = chartPanel.Height - (margin * 2);
 
             // Find max value for scaling
@@ -172,57 +240,100 @@ namespace SmartHospitalMS
                 int x = margin + (i * (barWidth + spacing));
                 int y = chartPanel.Height - margin - h;
 
-                // Draw Bar
-                g.FillRectangle(new SolidBrush(Color.FromArgb(41, 128, 185)), x, y, barWidth, h);
+                // Draw Bar with rounded top
+                using (var brush = new SolidBrush(UIStyles.PrimaryColor))
+                {
+                    g.FillRectangle(brush, x, y, barWidth, h);
+                }
                 
                 // Draw Value
-                g.DrawString(val.ToString(), new Font("Segoe UI", 8, FontStyle.Bold), Brushes.Black, x + (barWidth/3), y - 18);
+                g.DrawString(val.ToString(), UIStyles.SmallFont, Brushes.Black, x + (barWidth/2) - 10, y - 20);
                 
-                // Draw Label
-                g.DrawString(day, new Font("Segoe UI", 8), Brushes.Black, x, chartPanel.Height - margin + 5);
+                // Draw Label rotated or slanted
+                g.DrawString(day, UIStyles.SmallFont, Brushes.Black, x, chartPanel.Height - margin + 10);
             }
 
             // Draw Axes
-            g.DrawLine(new Pen(Color.Gray, 2), margin, margin, margin, chartPanel.Height - margin); // Y
-            g.DrawLine(new Pen(Color.Gray, 2), margin, chartPanel.Height - margin, chartPanel.Width - margin, chartPanel.Height - margin); // X
+            using (var pen = new Pen(Color.LightGray, 1))
+            {
+                g.DrawLine(pen, margin, margin, margin, chartPanel.Height - margin); // Y
+                g.DrawLine(pen, margin, chartPanel.Height - margin, chartPanel.Width - margin, chartPanel.Height - margin); // X
+            }
         }
 
         private void UpdateChartSize()
         {
             if (chartData == null || chartData.Rows.Count == 0) return;
 
-            int margin = 40;
-            int barWidth = 80;
-            int spacing = 20;
+            int margin = 50;
+            int barWidth = 60;
+            int spacing = 30;
             int requiredWidth = margin + (chartData.Rows.Count * (barWidth + spacing)) + margin;
 
-            // Ensure we use at least the container width
             int containerWidth = chartPanel.Parent != null ? chartPanel.Parent.Width : 740;
-            chartPanel.Width = Math.Max(requiredWidth, containerWidth - 5);
+            chartPanel.Width = Math.Max(requiredWidth, containerWidth - 20);
+            chartPanel.Height = chartPanel.Parent != null ? chartPanel.Parent.Height - 20 : 330;
         }
 
         private Button CreateNavButton(string text, int yPos)
         {
-            return new Button {
-                Text = text,
-                Location = new Point(0, yPos),
-                Size = new Size(200, 45),
+            Button btn = new Button {
+                Text = "  " + text,
+                Size = new Size(220, 50),
                 FlatStyle = FlatStyle.Flat,
-                ForeColor = Color.White,
+                ForeColor = Color.FromArgb(200, 200, 200),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(20, 0, 0, 0),
-                FlatAppearance = { BorderSize = 0 }
+                Font = UIStyles.RegularFont,
+                Cursor = Cursors.Hand
             };
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(52, 73, 94);
+            
+            btn.MouseEnter += (s, e) => btn.ForeColor = Color.White;
+            btn.MouseLeave += (s, e) => btn.ForeColor = Color.FromArgb(200, 200, 200);
+
+            return btn;
         }
 
-        private Panel CreateStatCard(string title, out Label valLabel, Color bgColor)
+        private Panel CreateStatCard(string title, out Label valLabel, Color accentColor)
         {
-            Panel p = new Panel { Size = new Size(175, 100), BackColor = bgColor, Margin = new Padding(0, 0, 20, 0) };
-            Label t = new Label { Text = title, ForeColor = Color.White, Font = new Font("Segoe UI", 10), Location = new Point(10, 10), AutoSize = true };
-            valLabel = new Label { Text = "0", ForeColor = Color.White, Font = new Font("Segoe UI", 20, FontStyle.Bold), Location = new Point(10, 40), AutoSize = true };
-            p.Controls.Add(t);
-            p.Controls.Add(valLabel);
-            return p;
+            Panel card = new Panel { 
+                BackColor = Color.White, 
+                Margin = new Padding(10),
+                Padding = new Padding(15),
+                Dock = DockStyle.Fill
+            };
+            
+            // Accent line at top
+            Panel accent = new Panel { BackColor = accentColor, Dock = DockStyle.Top, Height = 4 };
+            card.Controls.Add(accent);
+
+            Label t = new Label { 
+                Text = title.ToUpper(), 
+                ForeColor = UIStyles.TextSecondary, 
+                Font = UIStyles.SmallFont, 
+                Dock = DockStyle.Top,
+                Height = 25,
+                TextAlign = ContentAlignment.BottomLeft
+            };
+            
+            valLabel = new Label { 
+                Text = "0", 
+                ForeColor = UIStyles.TextPrimary, 
+                Font = UIStyles.StatValueFont, 
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+            
+            card.Controls.Add(valLabel);
+            card.Controls.Add(t);
+            
+            // Add to a wrapper to create margins in TableLayoutPanel
+            Panel wrapper = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
+            wrapper.Controls.Add(card);
+            
+            return wrapper;
         }
 
         private async void LoadStats()

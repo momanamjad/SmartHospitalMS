@@ -36,37 +36,117 @@ namespace SmartHospitalMS
 
         private void SetupUI()
         {
-            this.BackColor = Color.White;
+            this.BackColor = UIStyles.LightBackground;
+            this.DoubleBuffered = true;
 
-            // 1. Input Panel (LEFT)
-            Panel pnlInputs = new Panel { 
-                Location = new Point(0, 0),
-                Size = new Size(320, 700),
-                BackColor = Color.WhiteSmoke, 
-                Padding = new Padding(15),
-                BorderStyle = BorderStyle.FixedSingle,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+            // Main Layout Container
+            TableLayoutPanel mainLayout = new TableLayoutPanel {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1
             };
-            
-            int y = 20;
-            txtFullName = CreateInput(pnlInputs, "Full Name:", ref y);
-            cmbGender = CreateComboBox(pnlInputs, "Gender:", new string[] { "Male", "Female", "Other" }, ref y);
-            txtAge = CreateInput(pnlInputs, "Age:", ref y);
-            cmbBloodGroup = CreateComboBox(pnlInputs, "Blood Group:", new string[] { "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-" }, ref y);
-            txtDisease = CreateInput(pnlInputs, "Disease:", ref y);
-            txtContact = CreateInput(pnlInputs, "Contact (11 Digits):", ref y);
-            txtAddress = CreateInput(pnlInputs, "Address:", ref y);
-            txtDoctor = CreateInput(pnlInputs, "Assigned Doctor:", ref y);
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 350F));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            this.Controls.Add(mainLayout);
 
-            btnAdd = new Button { Text = "Add New", Location = new Point(15, y), Size = new Size(90, 40), BackColor = Color.Green, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
-            btnUpdate = new Button { Text = "Update", Location = new Point(110, y), Size = new Size(90, 40), BackColor = Color.Orange, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
-            btnDelete = new Button { Text = "Delete", Location = new Point(205, y), Size = new Size(90, 40), BackColor = Color.Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            // 1. Sidebar Input Panel
+            Panel pnlSide = new Panel { 
+                Dock = DockStyle.Fill,
+                BackColor = Color.White, 
+                Padding = new Padding(20),
+                BorderStyle = BorderStyle.None
+            };
+            mainLayout.Controls.Add(pnlSide, 0, 0);
             
-            y += 50;
-            Button btnHistory = new Button { Text = "View Patient History", Location = new Point(15, y), Size = new Size(280, 40), BackColor = Color.SteelBlue, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+            Panel pnlSideScroll = new Panel {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
+            };
+
+            Label lblInputTitle = new Label { 
+                Text = "PATIENT DETAILS", 
+                Font = UIStyles.SubHeaderFont, 
+                ForeColor = UIStyles.PrimaryColor, 
+                Dock = DockStyle.Top, 
+                Height = 40 
+            };
+            pnlSide.Controls.Add(pnlSideScroll);
+            pnlSide.Controls.Add(lblInputTitle);
+
+            TableLayoutPanel tlpInputs = new TableLayoutPanel {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                ColumnCount = 1,
+                RowCount = 16,
+                Padding = new Padding(0, 10, 20, 10)
+            };
+            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
+            txtFullName = CreateInputModern(tlpInputs, "Full Name");
+            cmbGender = CreateComboBoxModern(tlpInputs, "Gender", new string[] { "Male", "Female", "Other" });
+            txtAge = CreateInputModern(tlpInputs, "Age");
+            cmbBloodGroup = CreateComboBoxModern(tlpInputs, "Blood Group", new string[] { "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-" });
+            txtDisease = CreateInputModern(tlpInputs, "Disease");
+            txtContact = CreateInputModern(tlpInputs, "Contact (11 Digits)");
+            txtAddress = CreateInputModern(tlpInputs, "Address");
+            txtDoctor = CreateInputModern(tlpInputs, "Assigned Doctor");
+
+            pnlSideScroll.Controls.Add(tlpInputs);
+
+            // Action Buttons
+            FlowLayoutPanel flpButtons = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 100, Padding = new Padding(0, 10, 0, 0) };
+            btnAdd = CreateActionButton("Add New", UIStyles.AccentColor);
+            btnUpdate = CreateActionButton("Update", Color.Orange);
+            btnDelete = CreateActionButton("Delete", UIStyles.DangerColor);
             
-            y += 50;
-            btnClear = new Button { Text = "Clear All Fields", Location = new Point(15, y), Size = new Size(280, 35), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9) };
+            flpButtons.Controls.AddRange(new Control[] { btnAdd, btnUpdate, btnDelete });
+            pnlSideScroll.Controls.Add(flpButtons);
+
+            Button btnHistory = new Button { 
+                Text = "VIEW PATIENT HISTORY", 
+                Dock = DockStyle.Top, 
+                Height = 45, 
+                BackColor = UIStyles.PrimaryColor, 
+                ForeColor = Color.White, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont 
+            };
+            btnHistory.FlatAppearance.BorderSize = 0;
+            
+            btnClear = new Button { 
+                Text = "Clear All Fields", 
+                Dock = DockStyle.Top, 
+                Height = 35, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont,
+                ForeColor = UIStyles.TextSecondary
+            };
+            btnClear.FlatAppearance.BorderSize = 0;
+
+            pnlSideScroll.Controls.Add(btnClear);
+            pnlSideScroll.Controls.Add(new Panel { Dock = DockStyle.Top, Height = 10 }); // Spacer
+            pnlSideScroll.Controls.Add(btnHistory);
+
+            // 2. Main Grid Area
+            Panel pnlMain = new Panel { Dock = DockStyle.Fill, Padding = new Padding(25) };
+            mainLayout.Controls.Add(pnlMain, 1, 0);
+            
+            Panel pnlSearch = new Panel { Dock = DockStyle.Top, Height = 60 };
+            Label lblSearch = new Label { Text = "SEARCH PATIENTS", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 20 };
+            txtSearch = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont };
+            txtSearch.TextChanged += (s, e) => LoadPatients(txtSearch.Text.Trim());
+            pnlSearch.Controls.Add(txtSearch);
+            pnlSearch.Controls.Add(lblSearch);
+
+            dgvPatients = new DataGridView { 
+                Dock = DockStyle.Fill,
+                Margin = new Padding(0, 20, 0, 0)
+            };
+            UIStyles.ApplyModernStyle(dgvPatients);
+            dgvPatients.CellClick += DgvPatients_CellClick;
+
+            pnlMain.Controls.Add(dgvPatients);
+            pnlMain.Controls.Add(pnlSearch);
 
             btnAdd.Click += BtnAdd_Click;
             btnUpdate.Click += BtnUpdate_Click;
@@ -76,53 +156,37 @@ namespace SmartHospitalMS
                 new PatientHistoryForm(selectedPatientID, txtFullName.Text).ShowDialog();
             };
             btnClear.Click += (s, e) => ClearFields();
-
-            pnlInputs.Controls.AddRange(new Control[] { btnAdd, btnUpdate, btnDelete, btnHistory, btnClear });
-            this.Controls.Add(pnlInputs);
-
-            // 2. Grid Area (RIGHT) - FIXED LAYOUT
-            // Requirement 1: Grid must start after the input panel (x=320) and not overlap
-            Label lblSearch = new Label { Text = "Search Patient:", Location = new Point(340, 20), AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            txtSearch = new TextBox { Location = new Point(450, 18), Size = new Size(400, 25) };
-            txtSearch.TextChanged += (s, e) => LoadPatients(txtSearch.Text.Trim());
-
-            dgvPatients = new DataGridView { 
-                Location = new Point(340, 60), 
-                Size = new Size(820, 580), 
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.Fixed3D,
-                AllowUserToAddRows = false,
-                RowHeadersVisible = false
-            };
-            dgvPatients.CellClick += DgvPatients_CellClick;
-
-            this.Controls.Add(lblSearch);
-            this.Controls.Add(txtSearch);
-            this.Controls.Add(dgvPatients);
         }
 
-        private TextBox CreateInput(Panel p, string label, ref int y)
+        private TextBox CreateInputModern(TableLayoutPanel tlp, string label)
         {
-            p.Controls.Add(new Label { Text = label, Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            TextBox tb = new TextBox { Location = new Point(130, y), Size = new Size(160, 25) };
-            p.Controls.Add(tb);
-            y += 40;
+            tlp.Controls.Add(new Label { Text = label, Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true, Margin = new Padding(0, 5, 0, 0) });
+            TextBox tb = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, Margin = new Padding(0, 0, 0, 10) };
+            tlp.Controls.Add(tb);
             return tb;
         }
 
-        private ComboBox CreateComboBox(Panel p, string label, string[] items, ref int y)
+        private ComboBox CreateComboBoxModern(TableLayoutPanel tlp, string label, string[] items)
         {
-            p.Controls.Add(new Label { Text = label, Location = new Point(15, y), AutoSize = true, Font = new Font("Segoe UI", 9) });
-            ComboBox cb = new ComboBox { Location = new Point(130, y), Size = new Size(160, 25), DropDownStyle = ComboBoxStyle.DropDownList };
+            tlp.Controls.Add(new Label { Text = label, Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, AutoSize = true, Margin = new Padding(0, 5, 0, 0) });
+            ComboBox cb = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList, Margin = new Padding(0, 0, 0, 10) };
             cb.Items.AddRange(items);
-            p.Controls.Add(cb);
-            y += 40;
+            tlp.Controls.Add(cb);
             return cb;
+        }
+
+        private Button CreateActionButton(string text, Color color)
+        {
+            Button btn = new Button { 
+                Text = text, 
+                Size = new Size(95, 38), 
+                BackColor = color, 
+                ForeColor = Color.White, 
+                FlatStyle = FlatStyle.Flat, 
+                Font = UIStyles.SmallFont 
+            };
+            btn.FlatAppearance.BorderSize = 0;
+            return btn;
         }
 
         private List<Patient> allPatients = new List<Patient>();

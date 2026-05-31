@@ -30,20 +30,23 @@ The application needs a database to store patient and doctor information. You ha
 8.  Do the same for `SmartHospitalMS/SecurityUpdate.sql`.
 
 ### Method B: The Terminal Way (Using Commands)
-Open PowerShell and copy-paste these one by one:
+1. Open PowerShell **in the main folder** (where the `.sln` file is).
+2. Copy-paste these one by one:
 ```powershell
 # 1. Start the engine
 sqllocaldb start MSSQLLocalDB
 
 # 2. Create the database
-sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "CREATE DATABASE HospitalDB"
+sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'HospitalDB') CREATE DATABASE HospitalDB"
 
-# 3. Create tables (Make sure you are in the project folder)
+# 3. Create tables
 sqlcmd -S "(localdb)\MSSQLLocalDB" -d HospitalDB -i SmartHospitalMS/DatabaseSetup.sql
 
 # 4. Setup secure passwords
 sqlcmd -S "(localdb)\MSSQLLocalDB" -d HospitalDB -i SmartHospitalMS/SecurityUpdate.sql
 ```
+
+*Note: If you are already inside the `SmartHospitalMS` folder, remove the `SmartHospitalMS/` part from the file paths in steps 3 and 4.*
 
 ---
 ## 🏃 Step 3: Running the App

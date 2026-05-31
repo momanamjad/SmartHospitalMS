@@ -22,30 +22,99 @@ namespace SmartHospitalMS
         private void SetupForm()
         {
             this.Text = "Smart Hospital MS - Login";
-            this.Size = new System.Drawing.Size(400, 300);
+            this.Size = new System.Drawing.Size(480, 550);
+            this.MinimumSize = new System.Drawing.Size(480, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
+            this.BackColor = UIStyles.LightBackground;
 
-            Label lblTitle = new Label() { Text = "Hospital Login", Font = new System.Drawing.Font("Arial", 16, System.Drawing.FontStyle.Bold), Location = new System.Drawing.Point(100, 20), Size = new System.Drawing.Size(200, 30), TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+            // Simple Card Panel
+            Panel card = new Panel {
+                Size = new System.Drawing.Size(380, 460),
+                BackColor = Color.White,
+                Padding = new Padding(30),
+                BorderStyle = BorderStyle.None
+            };
+
+            // Centering logic
+            Action centerCard = () => {
+                card.Left = (this.ClientSize.Width - card.Width) / 2;
+                card.Top = (this.ClientSize.Height - card.Height) / 2;
+            };
+            this.Load += (s, e) => centerCard();
+            this.Resize += (s, e) => centerCard();
+
+            Label lblTitle = new Label { 
+                Text = "Hospital Login", 
+                Font = UIStyles.HeaderFont, 
+                ForeColor = UIStyles.PrimaryColor,
+                TextAlign = ContentAlignment.MiddleCenter, 
+                Dock = DockStyle.Top,
+                Height = 60,
+                Margin = new Padding(0, 0, 0, 10)
+            };
             
-            Label lblUser = new Label() { Text = "Username:", Location = new System.Drawing.Point(50, 70), Size = new System.Drawing.Size(80, 20) };
-            txtUsername = new TextBox() { Location = new System.Drawing.Point(150, 70), Size = new System.Drawing.Size(180, 20) };
+            Panel inputArea = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 10, 0, 0) };
 
-            Label lblPass = new Label() { Text = "Password:", Location = new System.Drawing.Point(50, 110), Size = new System.Drawing.Size(80, 20) };
-            txtPassword = new TextBox() { Location = new System.Drawing.Point(150, 110), Size = new System.Drawing.Size(180, 20), PasswordChar = '*' };
+            // Username
+            Label lblUser = new Label { Text = "Username", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
+            txtUsername = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont };
+            Panel s1 = new Panel { Dock = DockStyle.Top, Height = 15 };
 
-            Label lblRole = new Label() { Text = "Role:", Location = new System.Drawing.Point(50, 150), Size = new System.Drawing.Size(80, 20) };
-            cmbRole = new ComboBox() { Location = new System.Drawing.Point(150, 150), Size = new System.Drawing.Size(180, 20), DropDownStyle = ComboBoxStyle.DropDownList };
+            // Password
+            Label lblPass = new Label { Text = "Password", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
+            txtPassword = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, PasswordChar = '*' };
+            Panel s2 = new Panel { Dock = DockStyle.Top, Height = 15 };
+
+            // Role
+            Label lblRole = new Label { Text = "Role", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
+            cmbRole = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList };
             cmbRole.Items.AddRange(new string[] { "Admin", "Doctor", "Receptionist" });
             cmbRole.SelectedIndex = 0;
+            Panel s3 = new Panel { Dock = DockStyle.Top, Height = 25 };
 
-            btnLogin = new Button() { Text = "Login", Location = new System.Drawing.Point(150, 190), Size = new System.Drawing.Size(180, 35), BackColor = System.Drawing.Color.SteelBlue, ForeColor = System.Drawing.Color.White };
+            // Button
+            btnLogin = new Button { 
+                Text = "LOGIN", 
+                Dock = DockStyle.Top, 
+                Height = 50, 
+                BackColor = UIStyles.PrimaryColor, 
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = UIStyles.SubHeaderFont,
+                Cursor = Cursors.Hand
+            };
+            btnLogin.FlatAppearance.BorderSize = 0;
             btnLogin.Click += BtnLogin_Click;
 
-            lblMessage = new Label() { Text = "", Location = new System.Drawing.Point(50, 235), Size = new System.Drawing.Size(300, 20), ForeColor = System.Drawing.Color.Red, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
+            lblMessage = new Label { 
+                Text = "", 
+                Dock = DockStyle.Top, 
+                Height = 40, 
+                ForeColor = UIStyles.DangerColor, 
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = UIStyles.SmallFont,
+                Margin = new Padding(0, 5, 0, 0)
+            };
 
-            this.Controls.AddRange(new Control[] { lblTitle, lblUser, txtUsername, lblPass, txtPassword, lblRole, cmbRole, btnLogin, lblMessage });
+            // Add in reverse order for Dock.Top
+            inputArea.Controls.Add(lblMessage);
+            inputArea.Controls.Add(btnLogin);
+            inputArea.Controls.Add(s3);
+            inputArea.Controls.Add(cmbRole);
+            inputArea.Controls.Add(lblRole);
+            inputArea.Controls.Add(s2);
+            inputArea.Controls.Add(txtPassword);
+            inputArea.Controls.Add(lblPass);
+            inputArea.Controls.Add(s1);
+            inputArea.Controls.Add(txtUsername);
+            inputArea.Controls.Add(lblUser);
+
+            card.Controls.Add(inputArea);
+            card.Controls.Add(lblTitle);
+
+            this.Controls.Add(card);
         }
 
         private void InitializeComponent()
@@ -56,11 +125,10 @@ namespace SmartHospitalMS
             this.ResumeLayout(false);
         }
 
-        private void BtnLogin_Click(object sender, EventArgs e)
+        private async void BtnLogin_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text; 
-            string role = cmbRole.SelectedItem.ToString();
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
@@ -70,6 +138,12 @@ namespace SmartHospitalMS
 
             try
             {
+                lblMessage.ForeColor = System.Drawing.Color.Blue;
+                lblMessage.Text = "Logging in... please wait.";
+                btnLogin.Enabled = false;
+
+                string role = cmbRole.SelectedItem?.ToString() ?? "Admin";
+
                 // Requirement: Hash the input password before checking against the DB
                 string hashedPassword = SecurityHelper.HashPassword(password);
 
@@ -77,11 +151,12 @@ namespace SmartHospitalMS
                 string query = "SELECT * FROM Users WHERE Username = @user AND PasswordHash = @pass AND Role = @role";
                 SqlParameter[] parameters = {
                     new SqlParameter("@user", username),
-                    new SqlParameter("@pass", hashedPassword), // Now comparing against hash
+                    new SqlParameter("@pass", hashedPassword), 
                     new SqlParameter("@role", role)
                 };
 
-                DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
+                // Use Task.Run to keep UI responsive during DB call
+                DataTable dt = await Task.Run(() => DatabaseHelper.ExecuteQuery(query, parameters));
 
                 if (dt.Rows.Count > 0)
                 {
@@ -101,11 +176,16 @@ namespace SmartHospitalMS
                 }
                 else
                 {
+                    lblMessage.ForeColor = System.Drawing.Color.Red;
                     lblMessage.Text = "Invalid username, password, or role.";
+                    btnLogin.Enabled = true;
                 }
             }
             catch (Exception ex)
             {
+                lblMessage.ForeColor = System.Drawing.Color.Red;
+                lblMessage.Text = "Login failed.";
+                btnLogin.Enabled = true;
                 MessageBox.Show("Security Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
