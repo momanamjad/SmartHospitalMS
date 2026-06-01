@@ -18,7 +18,6 @@ namespace SmartHospitalMS
             InitializeComponent();
             SetupForm();
         }
-
         private void SetupForm()
         {
             this.Text = "Smart Hospital MS - Login";
