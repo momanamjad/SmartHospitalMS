@@ -11,9 +11,8 @@ namespace SmartHospitalMS
         private TextBox txtPassword;
         private ComboBox cmbRole;
         private Button btnLogin;
-        private Label lblMessage;
-
-        public LoginForm()
+        private Label lblMessage;   
+             public LoginForm()
         {
             InitializeComponent();
             SetupForm();
