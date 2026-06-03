@@ -16,8 +16,8 @@ namespace SmartHospitalMS
         {
             InitializeComponent();
             SetupForm();
-        }
-        private void SetupForm()
+        }    
+            private void SetupForm()
         {
             this.Text = "Smart Hospital MS - Login";
             this.Size = new System.Drawing.Size(480, 550);
@@ -85,7 +85,6 @@ namespace SmartHospitalMS
             };
             btnLogin.FlatAppearance.BorderSize = 0;
             btnLogin.Click += BtnLogin_Click;
-
             lblMessage = new Label { 
                 Text = "", 
                 Dock = DockStyle.Top, 
