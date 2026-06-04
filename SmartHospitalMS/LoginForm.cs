@@ -110,7 +110,6 @@ namespace SmartHospitalMS
 
             card.Controls.Add(inputArea);
             card.Controls.Add(lblTitle);
-
             this.Controls.Add(card);
         }
 
