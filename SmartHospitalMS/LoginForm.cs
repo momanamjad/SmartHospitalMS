@@ -7,8 +7,7 @@ namespace SmartHospitalMS
 {
     public partial class LoginForm : Form
     {
-        private TextBox txtUsername;
-        private TextBox txtPassword;
+        private TextBox txtUsername;        private TextBox txtPassword;
         private ComboBox cmbRole;
         private Button btnLogin;
         private Label lblMessage;   
@@ -52,7 +51,6 @@ namespace SmartHospitalMS
                 Height = 60,
                 Margin = new Padding(0, 0, 0, 10)
             };
-            
             Panel inputArea = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 10, 0, 0) };
 
             // Username
