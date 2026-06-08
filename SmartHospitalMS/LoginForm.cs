@@ -52,12 +52,10 @@ namespace SmartHospitalMS
                 Margin = new Padding(0, 0, 0, 10)
             };
             Panel inputArea = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 10, 0, 0) };
-
             // Username
             Label lblUser = new Label { Text = "Username", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
             txtUsername = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont };
             Panel s1 = new Panel { Dock = DockStyle.Top, Height = 15 };
-
             // Password
             Label lblPass = new Label { Text = "Password", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
             txtPassword = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, PasswordChar = '*' };
