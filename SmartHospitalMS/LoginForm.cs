@@ -60,7 +60,6 @@ namespace SmartHospitalMS
             Label lblPass = new Label { Text = "Password", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
             txtPassword = new TextBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, PasswordChar = '*' };
             Panel s2 = new Panel { Dock = DockStyle.Top, Height = 15 };
-
             // Role
             Label lblRole = new Label { Text = "Role", Font = UIStyles.SmallFont, ForeColor = UIStyles.TextSecondary, Dock = DockStyle.Top, Height = 25 };
             cmbRole = new ComboBox { Dock = DockStyle.Top, Font = UIStyles.RegularFont, DropDownStyle = ComboBoxStyle.DropDownList };
